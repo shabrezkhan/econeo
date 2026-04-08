@@ -1,16 +1,24 @@
 import express from "express";
 import { createServer as createViteServer } from "vite";
-import path from "path";
+import * as path from "path";
 import nodemailer from "nodemailer";
 import dotenv from "dotenv";
 
 dotenv.config();
 
-async function startServer() {
-  const app = express();
-  const PORT = 3000;
+console.log("Starting server initialization...");
 
-  app.use(express.json());
+async function startServer() {
+  try {
+    const app = express();
+    const PORT = 3000;
+
+    app.use(express.json());
+
+    // Simple health check
+    app.get("/api/health-check", (req, res) => {
+      res.json({ status: "ok", timestamp: new Date().toISOString() });
+    });
 
   // API Route for Contact Form
   app.post("/api/contact", async (req, res) => {
@@ -90,9 +98,13 @@ ${message}
     });
   }
 
-  app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Server running on http://localhost:${PORT}`);
-  });
+    app.listen(PORT, "0.0.0.0", () => {
+      console.log(`Server running on http://localhost:${PORT}`);
+    });
+  } catch (error) {
+    console.error("Failed to start server:", error);
+    process.exit(1);
+  }
 }
 
 startServer();
