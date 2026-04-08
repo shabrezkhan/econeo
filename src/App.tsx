@@ -602,10 +602,11 @@ export default function App() {
               <div className="aspect-square bg-econeo-green/5 rounded-full absolute -top-10 -right-10 w-full h-full -z-10 animate-pulse" />
               <div className="relative rounded-3xl overflow-hidden shadow-2xl border-8 border-white">
                 <img 
-                  src="https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?auto=format&fit=crop&q=80&w=1000" 
-                  alt="E-waste recycling"
+                  src="https://images.unsplash.com/photo-1605600611284-195205ef91b2?auto=format&fit=crop&q=80&w=1000" 
+                  alt="E-waste recycling process"
                   className="w-full h-full object-cover"
                   referrerPolicy="no-referrer"
+                  loading="eager"
                 />
               </div>
               {/* Floating Card */}
@@ -672,12 +673,36 @@ export default function App() {
             <div className="relative">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-4">
-                  <img src="https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&q=80&w=500" className="rounded-2xl shadow-lg" referrerPolicy="no-referrer" />
-                  <img src="https://images.unsplash.com/photo-1611288875055-12840621668b?auto=format&fit=crop&q=80&w=500" className="rounded-2xl shadow-lg" referrerPolicy="no-referrer" />
+                  <img 
+                    src="https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&q=80&w=800" 
+                    alt="E-Waste Pile" 
+                    className="rounded-2xl shadow-lg w-full object-cover aspect-[4/5]" 
+                    referrerPolicy="no-referrer"
+                    loading="lazy"
+                  />
+                  <img 
+                    src="https://images.unsplash.com/photo-1555664424-778a1e5e1b48?auto=format&fit=crop&q=80&w=800" 
+                    alt="Circuit Board Detail" 
+                    className="rounded-2xl shadow-lg w-full object-cover aspect-square" 
+                    referrerPolicy="no-referrer"
+                    loading="lazy"
+                  />
                 </div>
                 <div className="pt-8 space-y-4">
-                  <img src="https://images.unsplash.com/photo-1550009158-9ebf69173e03?auto=format&fit=crop&q=80&w=500" className="rounded-2xl shadow-lg" referrerPolicy="no-referrer" />
-                  <img src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=80&w=500" className="rounded-2xl shadow-lg" referrerPolicy="no-referrer" />
+                  <img 
+                    src="https://images.unsplash.com/photo-1611288875055-12840621668b?auto=format&fit=crop&q=80&w=800" 
+                    alt="Electronic Components" 
+                    className="rounded-2xl shadow-lg w-full object-cover aspect-square" 
+                    referrerPolicy="no-referrer"
+                    loading="lazy"
+                  />
+                  <img 
+                    src="https://images.unsplash.com/photo-1550009158-9ebf69173e03?auto=format&fit=crop&q=80&w=800" 
+                    alt="Old Electronics" 
+                    className="rounded-2xl shadow-lg w-full object-cover aspect-[4/5]" 
+                    referrerPolicy="no-referrer"
+                    loading="lazy"
+                  />
                 </div>
               </div>
             </div>
