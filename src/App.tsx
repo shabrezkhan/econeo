@@ -602,8 +602,8 @@ export default function App() {
               <div className="aspect-square bg-econeo-green/5 rounded-full absolute -top-10 -right-10 w-full h-full -z-10 animate-pulse" />
               <div className="relative rounded-3xl overflow-hidden shadow-2xl border-8 border-white">
                 <img 
-                  src="https://images.unsplash.com/photo-1605600611284-195205ef91b2?auto=format&fit=crop&q=80&w=1000" 
-                  alt="E-waste recycling process"
+                  src="https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?auto=format&fit=crop&q=80&w=1000" 
+                  alt="E-waste recycling bin"
                   className="w-full h-full object-cover"
                   referrerPolicy="no-referrer"
                   loading="eager"
@@ -690,7 +690,7 @@ export default function App() {
                 </div>
                 <div className="pt-8 space-y-4">
                   <img 
-                    src="https://images.unsplash.com/photo-1611288875055-12840621668b?auto=format&fit=crop&q=80&w=800" 
+                    src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=800" 
                     alt="Electronic Components" 
                     className="rounded-2xl shadow-lg w-full object-cover aspect-square" 
                     referrerPolicy="no-referrer"
