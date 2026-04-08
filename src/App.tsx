@@ -12,9 +12,12 @@ import {
   Cpu, 
   CheckCircle2,
   Menu,
-  X
+  X,
+  Coins,
+  TrendingUp,
+  AlertCircle
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 
 const COMPANY_NAME = "ECONEO ORBIS PRIVATE LIMITED";
 const BRAND_NAME = "econeo recycling";
@@ -59,12 +62,13 @@ const stats = [
 const EnvironmentalImpact = () => {
   const [aqi, setAqi] = useState<number | null>(null);
   const [aqiStatus, setAqiStatus] = useState<string>("Loading...");
+  const [copperPrice, setCopperPrice] = useState<number>(762.45);
+  const [priceChange, setPriceChange] = useState<number>(1.25);
 
   // Fetch AQI for Mumbai
   useEffect(() => {
     const fetchAqi = async () => {
       try {
-        // Using a demo token for WAQI API
         const response = await fetch("https://api.waqi.info/feed/mumbai/?token=demo");
         const data = await response.json();
         if (data.status === "ok") {
@@ -76,7 +80,6 @@ const EnvironmentalImpact = () => {
           else if (val <= 200) setAqiStatus("Unhealthy");
           else setAqiStatus("Very Unhealthy");
         } else {
-          // Fallback to a realistic range for Mumbai if API fails
           const mockAqi = Math.floor(Math.random() * (160 - 110) + 110);
           setAqi(mockAqi);
           setAqiStatus("Moderate to Unhealthy");
@@ -87,6 +90,18 @@ const EnvironmentalImpact = () => {
       }
     };
     fetchAqi();
+  }, []);
+
+  // Simulate Live Copper Price (MCX Mumbai)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCopperPrice(prev => {
+        const change = (Math.random() - 0.5) * 0.5;
+        setPriceChange(change);
+        return parseFloat((prev + change).toFixed(2));
+      });
+    }, 5000);
+    return () => clearInterval(interval);
   }, []);
 
   const globalStats = [
@@ -111,7 +126,7 @@ const EnvironmentalImpact = () => {
   return (
     <section className="py-24 bg-econeo-teal text-econeo-beige overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid lg:grid-cols-3 gap-12">
+        <div className="grid lg:grid-cols-4 gap-8">
           {/* AQI Card */}
           <motion.div 
             initial={{ opacity: 0, x: -20 }}
@@ -135,10 +150,40 @@ const EnvironmentalImpact = () => {
               }`}>
                 {aqiStatus}
               </p>
-              <p className="text-sm opacity-70">Real-time air quality index for Mumbai. E-waste recycling helps reduce toxic emissions from landfills.</p>
+              <p className="text-sm opacity-70">Real-time air quality index for Mumbai. E-waste recycling helps reduce toxic emissions.</p>
             </div>
             <div className="mt-8 pt-6 border-t border-white/10 text-xs opacity-50">
               Last updated: {new Date().toLocaleTimeString()}
+            </div>
+          </motion.div>
+
+          {/* Copper Market Card */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="bg-white/10 backdrop-blur-lg p-8 rounded-3xl border border-white/10 flex flex-col justify-between"
+          >
+            <div>
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-2 bg-orange-500 rounded-lg">
+                  <Coins className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="text-xl font-bold">Mumbai Copper Market</h3>
+              </div>
+              <div className="flex items-baseline gap-4 mb-2">
+                <span className="text-5xl font-bold">₹{copperPrice}</span>
+                <span className="text-lg opacity-60 font-medium">/kg</span>
+              </div>
+              <div className={`flex items-center gap-2 text-sm font-bold mb-4 ${priceChange >= 0 ? "text-green-400" : "text-red-400"}`}>
+                <TrendingUp className={`w-4 h-4 ${priceChange < 0 ? "rotate-180" : ""}`} />
+                {priceChange >= 0 ? "+" : ""}{priceChange.toFixed(2)} (Live)
+              </div>
+              <p className="text-sm opacity-70">Estimated MCX Mumbai spot price. Copper is a primary resource recovered from high-grade e-waste.</p>
+            </div>
+            <div className="mt-8 pt-6 border-t border-white/10 text-xs opacity-50 flex justify-between">
+              <span>MCX Live Feed</span>
+              <span>{new Date().toLocaleTimeString()}</span>
             </div>
           </motion.div>
 
@@ -184,6 +229,128 @@ const EnvironmentalImpact = () => {
         </div>
       </div>
     </section>
+  );
+};
+
+const ContactForm = () => {
+  const [status, setStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setStatus("sending");
+    setErrorMessage("");
+
+    const formData = new FormData(e.currentTarget);
+    const data = {
+      name: formData.get("name"),
+      email: formData.get("email"),
+      phone: formData.get("phone"),
+      subject: formData.get("subject"),
+      message: formData.get("message"),
+    };
+
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        setStatus("success");
+        (e.target as HTMLFormElement).reset();
+      } else {
+        setStatus("error");
+        setErrorMessage(result.error || "Failed to send message.");
+      }
+    } catch (error) {
+      setStatus("error");
+      setErrorMessage("Something went wrong. Please try again later.");
+    }
+  };
+
+  return (
+    <form className="space-y-6" onSubmit={handleSubmit}>
+      <div className="grid md:grid-cols-2 gap-6">
+        <div className="space-y-2">
+          <label className="text-sm font-bold uppercase tracking-wider opacity-60">Full Name</label>
+          <input 
+            name="name"
+            type="text" 
+            required
+            className="w-full px-4 py-3 rounded-xl border border-econeo-teal/10 focus:outline-none focus:ring-2 focus:ring-econeo-green/20 transition-all" 
+            placeholder="John Doe" 
+          />
+        </div>
+        <div className="space-y-2">
+          <label className="text-sm font-bold uppercase tracking-wider opacity-60">Email</label>
+          <input 
+            name="email"
+            type="email" 
+            required
+            className="w-full px-4 py-3 rounded-xl border border-econeo-teal/10 focus:outline-none focus:ring-2 focus:ring-econeo-green/20 transition-all" 
+            placeholder="john@example.com" 
+          />
+        </div>
+      </div>
+      <div className="grid md:grid-cols-2 gap-6">
+        <div className="space-y-2">
+          <label className="text-sm font-bold uppercase tracking-wider opacity-60">Phone Number</label>
+          <input 
+            name="phone"
+            type="tel" 
+            className="w-full px-4 py-3 rounded-xl border border-econeo-teal/10 focus:outline-none focus:ring-2 focus:ring-econeo-green/20 transition-all" 
+            placeholder="+91 00000 00000" 
+          />
+        </div>
+        <div className="space-y-2">
+          <label className="text-sm font-bold uppercase tracking-wider opacity-60">Subject</label>
+          <select 
+            name="subject"
+            className="w-full px-4 py-3 rounded-xl border border-econeo-teal/10 focus:outline-none focus:ring-2 focus:ring-econeo-green/20 transition-all"
+          >
+            <option>Corporate E-Waste Pickup</option>
+            <option>Data Destruction Service</option>
+            <option>General Inquiry</option>
+            <option>Partnership</option>
+          </select>
+        </div>
+      </div>
+      <div className="space-y-2">
+        <label className="text-sm font-bold uppercase tracking-wider opacity-60">Message</label>
+        <textarea 
+          name="message"
+          rows={4} 
+          required
+          className="w-full px-4 py-3 rounded-xl border border-econeo-teal/10 focus:outline-none focus:ring-2 focus:ring-econeo-green/20 transition-all" 
+          placeholder="How can we help you?"
+        ></textarea>
+      </div>
+      
+      {status === "success" && (
+        <div className="p-4 bg-green-50 text-green-700 rounded-xl flex items-center gap-3">
+          <CheckCircle2 className="w-5 h-5" />
+          Message sent successfully! We'll get back to you soon.
+        </div>
+      )}
+
+      {status === "error" && (
+        <div className="p-4 bg-red-50 text-red-700 rounded-xl flex items-center gap-3">
+          <AlertCircle className="w-5 h-5" />
+          {errorMessage}
+        </div>
+      )}
+
+      <button 
+        disabled={status === "sending"}
+        className="w-full bg-econeo-teal text-econeo-beige font-bold py-4 rounded-xl hover:bg-econeo-green transition-all shadow-lg shadow-econeo-teal/10 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        {status === "sending" ? "Sending..." : "Send Message"}
+      </button>
+    </form>
   );
 };
 
@@ -305,6 +472,9 @@ export default function App() {
         </div>
       </section>
 
+      {/* Environmental Impact Section */}
+      <EnvironmentalImpact />
+
       {/* Stats Section */}
       <section className="bg-econeo-teal py-20 border-b border-white/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -325,9 +495,6 @@ export default function App() {
           </div>
         </div>
       </section>
-
-      {/* Environmental Impact Section */}
-      <EnvironmentalImpact />
 
       {/* Services Section */}
       <section id="services" className="py-24 bg-white">
@@ -461,34 +628,7 @@ export default function App() {
             </div>
 
             <div className="bg-white rounded-3xl p-8 lg:p-12 text-econeo-teal">
-              <form className="space-y-6">
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <label className="text-sm font-bold uppercase tracking-wider opacity-60">Full Name</label>
-                    <input type="text" className="w-full px-4 py-3 rounded-xl border border-econeo-teal/10 focus:outline-none focus:ring-2 focus:ring-econeo-green/20 transition-all" placeholder="John Doe" />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-bold uppercase tracking-wider opacity-60">Email</label>
-                    <input type="email" className="w-full px-4 py-3 rounded-xl border border-econeo-teal/10 focus:outline-none focus:ring-2 focus:ring-econeo-green/20 transition-all" placeholder="john@example.com" />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-bold uppercase tracking-wider opacity-60">Subject</label>
-                  <select className="w-full px-4 py-3 rounded-xl border border-econeo-teal/10 focus:outline-none focus:ring-2 focus:ring-econeo-green/20 transition-all">
-                    <option>Corporate E-Waste Pickup</option>
-                    <option>Data Destruction Service</option>
-                    <option>General Inquiry</option>
-                    <option>Partnership</option>
-                  </select>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-bold uppercase tracking-wider opacity-60">Message</label>
-                  <textarea rows={4} className="w-full px-4 py-3 rounded-xl border border-econeo-teal/10 focus:outline-none focus:ring-2 focus:ring-econeo-green/20 transition-all" placeholder="How can we help you?"></textarea>
-                </div>
-                <button className="w-full bg-econeo-teal text-econeo-beige font-bold py-4 rounded-xl hover:bg-econeo-green transition-all shadow-lg shadow-econeo-teal/10">
-                  Send Message
-                </button>
-              </form>
+              <ContactForm />
             </div>
           </div>
         </div>
