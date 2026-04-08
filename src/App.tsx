@@ -1,4 +1,10 @@
-import { motion } from "motion/react";
+import { 
+  motion, 
+  useMotionValue, 
+  useTransform, 
+  useSpring,
+  AnimatePresence
+} from "motion/react";
 import { 
   Recycle, 
   Trash2, 
@@ -33,22 +39,46 @@ const services = [
   {
     title: "E-Waste Collection",
     description: "Safe and efficient collection of electronic waste from corporate and residential locations.",
-    icon: <Trash2 className="w-8 h-8" />
+    icon: <Trash2 className="w-6 h-6" />,
+    steps: [
+      "Schedule a pickup via our portal",
+      "On-site evaluation & weighing",
+      "Secure loading into specialized vehicles",
+      "Transport to authorized facility"
+    ]
   },
   {
     title: "Eco-Friendly Recycling",
     description: "State-of-the-art recycling processes that minimize environmental impact and maximize resource recovery.",
-    icon: <Recycle className="w-8 h-8" />
+    icon: <Recycle className="w-6 h-6" />,
+    steps: [
+      "Manual dismantling & sorting",
+      "Mechanical shredding & separation",
+      "Refining of precious metals",
+      "Safe disposal of hazardous residues"
+    ]
   },
   {
     title: "Secure Data Destruction",
     description: "Certified data wiping and physical destruction of hard drives and storage media.",
-    icon: <ShieldCheck className="w-8 h-8" />
+    icon: <ShieldCheck className="w-6 h-6" />,
+    steps: [
+      "Inventory logging of storage devices",
+      "Software-based data sanitization",
+      "Physical shredding of media",
+      "Issuance of destruction certificate"
+    ]
   },
   {
     title: "Asset Recovery",
     description: "Refurbishing and repurposing electronic components to extend their lifecycle.",
-    icon: <Cpu className="w-8 h-8" />
+    icon: <Cpu className="w-6 h-6" />,
+    steps: [
+      "Functionality testing & assessment",
+      "Component-level repair & cleaning",
+      "Software re-installation",
+      "Remarketing for extended life"
+    ]
   }
 ];
 
@@ -354,6 +384,119 @@ const ContactForm = () => {
   );
 };
 
+const ServiceCard = (props: any) => {
+  const { service, idx } = props;
+  const [isFlipped, setIsFlipped] = useState(false);
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+
+  const mouseXSpring = useSpring(x);
+  const mouseYSpring = useSpring(y);
+
+  const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ["17.5deg", "-17.5deg"]);
+  const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ["-17.5deg", "17.5deg"]);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const width = rect.width;
+    const height = rect.height;
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+    const xPct = mouseX / width - 0.5;
+    const yPct = mouseY / height - 0.5;
+    x.set(xPct);
+    y.set(yPct);
+  };
+
+  const handleMouseLeave = () => {
+    x.set(0);
+    y.set(0);
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ delay: idx * 0.1 }}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      onClick={() => setIsFlipped(!isFlipped)}
+      style={{
+        rotateX,
+        rotateY,
+        transformStyle: "preserve-3d",
+      }}
+      className="relative h-[400px] w-full cursor-pointer group"
+    >
+      <div
+        style={{
+          transform: "translateZ(75px)",
+          transformStyle: "preserve-3d",
+        }}
+        className="absolute inset-4 flex flex-col rounded-3xl bg-white shadow-lg border border-econeo-teal/5 p-8 transition-all duration-500 group-hover:shadow-2xl"
+      >
+        <AnimatePresence mode="wait">
+          {!isFlipped ? (
+            <motion.div
+              key="front"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="flex flex-col items-center text-center h-full"
+              style={{ transform: "translateZ(50px)" }}
+            >
+              <div className="w-14 h-14 bg-econeo-beige rounded-xl flex items-center justify-center text-econeo-green shadow-sm mb-4 flex-shrink-0">
+                {service.icon}
+              </div>
+              <h3 className="text-xl font-bold mb-3">{service.title}</h3>
+              <p className="text-econeo-teal/70 leading-relaxed text-sm">
+                {service.description}
+              </p>
+              <div className="mt-auto pt-6 flex items-center gap-2 text-econeo-green font-bold text-sm">
+                Tap to see process <ArrowRight className="w-4 h-4" />
+              </div>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="back"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="w-full h-full flex flex-col"
+              style={{ transform: "translateZ(50px)" }}
+            >
+              <h4 className="text-lg font-bold mb-6 text-econeo-green flex items-center gap-2 flex-shrink-0">
+                <CheckCircle2 className="w-5 h-5" />
+                Our Process
+              </h4>
+              <div className="space-y-4 overflow-y-auto pr-2 custom-scrollbar">
+                {service.steps.map((step: string, i: number) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.1 }}
+                    className="flex items-start gap-3"
+                  >
+                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-econeo-green/10 text-econeo-green text-xs font-bold flex items-center justify-center">
+                      {i + 1}
+                    </span>
+                    <p className="text-sm font-medium text-econeo-teal/80">{step}</p>
+                  </motion.div>
+                ))}
+              </div>
+              <button className="mt-auto pt-4 text-xs font-bold opacity-40 hover:opacity-100 transition-opacity text-center w-full">
+                Tap to go back
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </motion.div>
+  );
+};
+
 const Logo = ({ className = "" }: { className?: string }) => (
   <img 
     src="/logo.svg" 
@@ -508,19 +651,7 @@ export default function App() {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {services.map((service, idx) => (
-              <motion.div
-                key={idx}
-                whileHover={{ y: -10 }}
-                className="p-8 rounded-3xl bg-econeo-beige border border-econeo-teal/5 hover:shadow-xl transition-all"
-              >
-                <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-econeo-green shadow-sm mb-6">
-                  {service.icon}
-                </div>
-                <h3 className="text-xl font-bold mb-3">{service.title}</h3>
-                <p className="text-econeo-teal/70 text-sm leading-relaxed">
-                  {service.description}
-                </p>
-              </motion.div>
+              <ServiceCard key={idx} service={service} idx={idx} />
             ))}
           </div>
         </div>
