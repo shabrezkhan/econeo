@@ -21,7 +21,8 @@ import {
   X,
   Coins,
   TrendingUp,
-  AlertCircle
+  AlertCircle,
+  MessageCircle
 } from "lucide-react";
 import React, { useState, useEffect } from "react";
 
@@ -287,18 +288,25 @@ const ContactForm = () => {
         body: JSON.stringify(data),
       });
 
-      const result = await response.json();
+      let result;
+      const contentType = response.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        result = await response.json();
+      } else {
+        result = { error: await response.text() };
+      }
 
       if (response.ok) {
         setStatus("success");
         (e.target as HTMLFormElement).reset();
       } else {
         setStatus("error");
-        setErrorMessage(result.error || "Failed to send message.");
+        setErrorMessage(result.error || `Server error: ${response.status}`);
       }
     } catch (error) {
+      console.error("Contact form error:", error);
       setStatus("error");
-      setErrorMessage("Something went wrong. Please try again later.");
+      setErrorMessage("Network error or server is offline. Please try again later.");
     }
   };
 
@@ -779,6 +787,23 @@ export default function App() {
           </div>
         </div>
       </footer>
+      
+      {/* WhatsApp Floating Button */}
+      <motion.a
+        href={`https://wa.me/${CONTACT.phones[0].replace(/\D/g, '')}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        initial={{ scale: 0, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+        className="fixed bottom-8 right-8 z-[100] bg-[#25D366] text-white p-4 rounded-full shadow-2xl flex items-center justify-center group"
+      >
+        <MessageCircle className="w-8 h-8" />
+        <span className="max-w-0 overflow-hidden group-hover:max-w-xs group-hover:ml-3 transition-all duration-500 font-bold whitespace-nowrap">
+          Chat with us
+        </span>
+      </motion.a>
     </div>
   );
 }

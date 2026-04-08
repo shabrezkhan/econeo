@@ -14,7 +14,8 @@ async function startServer() {
 
   // API Route for Contact Form
   app.post("/api/contact", async (req, res) => {
-    const { name, email, phone, message } = req.body;
+    console.log("Received contact form submission:", req.body);
+    const { name, email, phone, subject, message } = req.body;
 
     if (!name || !email || !message) {
       return res.status(400).json({ error: "Name, email, and message are required." });
@@ -27,13 +28,13 @@ async function startServer() {
     if (!emailUser || !emailPass) {
       console.error("Email credentials not configured in environment variables.");
       return res.status(500).json({ 
-        error: "Server email configuration missing. Please configure EMAIL_USER and EMAIL_PASS in settings." 
+        error: "Server email configuration missing. Please configure EMAIL_USER and EMAIL_PASS in the Settings menu (Secrets)." 
       });
     }
 
     try {
       const transporter = nodemailer.createTransport({
-        service: "gmail", // Assuming Google Admin uses Gmail infrastructure
+        service: "gmail",
         auth: {
           user: emailUser,
           pass: emailPass,
@@ -44,11 +45,12 @@ async function startServer() {
         from: `"${name}" <${emailUser}>`,
         replyTo: email,
         to: emailTo,
-        subject: `New Inquiry from ${name} - Econeo Recycling`,
+        subject: `[${subject || "General Inquiry"}] New Inquiry from ${name} - Econeo Recycling`,
         text: `
 Name: ${name}
 Email: ${email}
 Phone: ${phone || "N/A"}
+Subject: ${subject || "N/A"}
 
 Message:
 ${message}
@@ -58,16 +60,18 @@ ${message}
 <p><strong>Name:</strong> ${name}</p>
 <p><strong>Email:</strong> ${email}</p>
 <p><strong>Phone:</strong> ${phone || "N/A"}</p>
+<p><strong>Subject:</strong> ${subject || "N/A"}</p>
 <p><strong>Message:</strong></p>
 <p>${message.replace(/\n/g, '<br>')}</p>
         `,
       };
 
       await transporter.sendMail(mailOptions);
+      console.log("Email sent successfully!");
       res.status(200).json({ message: "Email sent successfully!" });
     } catch (error) {
       console.error("Error sending email:", error);
-      res.status(500).json({ error: "Failed to send email. Please try again later." });
+      res.status(500).json({ error: "Failed to send email. Error: " + (error instanceof Error ? error.message : String(error)) });
     }
   });
 
