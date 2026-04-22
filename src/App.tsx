@@ -94,8 +94,8 @@ const stats = [
 const EnvironmentalImpact = () => {
   const [aqi, setAqi] = useState<number | null>(null);
   const [aqiStatus, setAqiStatus] = useState<string>("Loading...");
-  const [copperPrice, setCopperPrice] = useState<number>(762.45);
-  const [priceChange, setPriceChange] = useState<number>(1.25);
+  const [copperPrice, setCopperPrice] = useState<number>(1271.15);
+  const [priceChange, setPriceChange] = useState<number>(3.15);
 
   // Fetch AQI for Mumbai
   useEffect(() => {
@@ -128,11 +128,12 @@ const EnvironmentalImpact = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       setCopperPrice(prev => {
-        const change = (Math.random() - 0.5) * 0.5;
+        const volatility = 1.2;
+        const change = (Math.random() - 0.48) * volatility;
         setPriceChange(change);
         return parseFloat((prev + change).toFixed(2));
       });
-    }, 5000);
+    }, 4000);
     return () => clearInterval(interval);
   }, []);
 
